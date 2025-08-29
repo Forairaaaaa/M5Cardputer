@@ -9,60 +9,32 @@
  *
  */
 #include "Keyboard.h"
-#include <driver/gpio.h>
+#include "IOMatrixKeyboardReader.h"
+#include <memory>
 
 #include "Arduino.h"
 
-#define digitalWrite(pin, level) gpio_set_level((gpio_num_t)pin, level)
-#define digitalRead(pin)         gpio_get_level((gpio_num_t)pin)
-
-void Keyboard_Class::_set_output(const std::vector<int>& pinList,
-                                 uint8_t output) {
-    output = output & 0B00000111;
-
-    digitalWrite(pinList[0], (output & 0B00000001));
-    digitalWrite(pinList[1], (output & 0B00000010));
-    digitalWrite(pinList[2], (output & 0B00000100));
+void Keyboard_Class::begin()
+{
+    // Default to IO Matrix keyboard reader for backward compatibility
+    _keyboard_reader = std::make_unique<IOMatrixKeyboardReader>();
+    _keyboard_reader->begin();
 }
 
-uint8_t Keyboard_Class::_get_input(const std::vector<int>& pinList) {
-    uint8_t buffer    = 0x00;
-    uint8_t pin_value = 0x00;
-
-    for (int i = 0; i < 7; i++) {
-        pin_value = (digitalRead(pinList[i]) == 1) ? 0x00 : 0x01;
-        pin_value = pin_value << i;
-        buffer    = buffer | pin_value;
-    }
-
-    return buffer;
+void Keyboard_Class::begin(std::unique_ptr<KeyboardReader> reader)
+{
+    _keyboard_reader = std::move(reader);
+    _keyboard_reader->begin();
 }
 
-void Keyboard_Class::begin() {
-    for (auto i : output_list) {
-        gpio_reset_pin((gpio_num_t)i);
-        gpio_set_direction((gpio_num_t)i, GPIO_MODE_OUTPUT);
-        gpio_set_pull_mode((gpio_num_t)i, GPIO_PULLUP_PULLDOWN);
-        digitalWrite(i, 0);
-    }
-
-    for (auto i : input_list) {
-        gpio_reset_pin((gpio_num_t)i);
-        gpio_set_direction((gpio_num_t)i, GPIO_MODE_INPUT);
-        gpio_set_pull_mode((gpio_num_t)i, GPIO_PULLUP_ONLY);
-    }
-
-    _set_output(output_list, 0);
-}
-
-uint8_t Keyboard_Class::getKey(Point2D_t keyCoor) {
+uint8_t Keyboard_Class::getKey(Point2D_t keyCoor)
+{
     uint8_t ret = 0;
 
     if ((keyCoor.x < 0) || (keyCoor.y < 0)) {
         return 0;
     }
-    if (_keys_state_buffer.ctrl || _keys_state_buffer.shift ||
-        _is_caps_locked) {
+    if (_keys_state_buffer.ctrl || _keys_state_buffer.shift || _is_caps_locked) {
         ret = _key_value_map[keyCoor.y][keyCoor.x].value_second;
     } else {
         ret = _key_value_map[keyCoor.y][keyCoor.x].value_first;
@@ -70,42 +42,20 @@ uint8_t Keyboard_Class::getKey(Point2D_t keyCoor) {
     return ret;
 }
 
-void Keyboard_Class::updateKeyList() {
-    _key_list_buffer.clear();
-    Point2D_t coor;
-    uint8_t input_value = 0;
-
-    for (int i = 0; i < 8; i++) {
-        _set_output(output_list, i);
-        input_value = _get_input(input_list);
-        /* If key pressed */
-
-        if (input_value) {
-            /* Get X */
-            for (int j = 0; j < 7; j++) {
-                if (input_value & (0x01 << j)) {
-                    coor.x = (i > 3) ? X_map_chart[j].x_1 : X_map_chart[j].x_2;
-
-                    /* Get Y */
-                    coor.y = (i > 3) ? (i - 4) : i;
-                    // printf("%d,%d\t", coor.x, coor.y);
-
-                    /* Keep the same as picture */
-                    coor.y = -coor.y;
-                    coor.y = coor.y + 3;
-
-                    _key_list_buffer.push_back(coor);
-                }
-            }
-        }
+void Keyboard_Class::updateKeyList()
+{
+    if (_keyboard_reader) {
+        _keyboard_reader->updateKeyList(_key_list_buffer);
     }
 }
 
-uint8_t Keyboard_Class::isPressed() {
+uint8_t Keyboard_Class::isPressed()
+{
     return _key_list_buffer.size();
 }
 
-bool Keyboard_Class::isChange() {
+bool Keyboard_Class::isChange()
+{
     if (_last_key_size != _key_list_buffer.size()) {
         _last_key_size = _key_list_buffer.size();
         return true;
@@ -114,7 +64,8 @@ bool Keyboard_Class::isChange() {
     }
 }
 
-bool Keyboard_Class::isKeyPressed(char c) {
+bool Keyboard_Class::isKeyPressed(char c)
+{
     if (_key_list_buffer.size()) {
         for (const auto& i : _key_list_buffer) {
             if (getKey(i) == c) return true;
@@ -125,7 +76,8 @@ bool Keyboard_Class::isKeyPressed(char c) {
 
 #include <cstring>
 
-void Keyboard_Class::updateKeysState() {
+void Keyboard_Class::updateKeysState()
+{
     _keys_state_buffer.reset();
     _key_pos_print_keys.clear();
     _key_pos_hid_keys.clear();
@@ -210,8 +162,7 @@ void Keyboard_Class::updateKeysState() {
 
     // Deal what left
     for (auto& i : _key_pos_print_keys) {
-        if (_keys_state_buffer.ctrl || _keys_state_buffer.shift ||
-            _is_caps_locked) {
+        if (_keys_state_buffer.ctrl || _keys_state_buffer.shift || _is_caps_locked) {
             _keys_state_buffer.word.push_back(getKeyValue(i).value_second);
         } else {
             _keys_state_buffer.word.push_back(getKeyValue(i).value_first);

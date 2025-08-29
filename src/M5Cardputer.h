@@ -3,6 +3,8 @@
 
 #include "M5Unified.h"
 #include "utility/Keyboard.h"
+#include "utility/KeyboardReader.h"
+#include "utility/IOMatrixKeyboardReader.h"
 
 namespace m5 {
 class M5_CARDPUTER {
