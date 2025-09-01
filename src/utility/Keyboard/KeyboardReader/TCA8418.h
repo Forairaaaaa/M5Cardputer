@@ -35,5 +35,6 @@ private:
 
     static void IRAM_ATTR gpio_isr_handler(void* arg);
     KeyEventRaw_t get_key_event_raw(const uint8_t& eventRaw);
-    void remap(KeyEventRaw_t& key);
+    void remap(KeyEventRaw_t& eventRaw);
+    void update_key_list(const KeyEventRaw_t& eventRaw);
 };

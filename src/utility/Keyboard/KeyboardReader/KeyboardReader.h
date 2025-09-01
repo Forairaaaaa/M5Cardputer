@@ -7,8 +7,13 @@
 #include <vector>
 
 struct Point2D_t {
-    int x;
-    int y;
+    int x = 0;
+    int y = 0;
+
+    bool operator==(const Point2D_t& other) const
+    {
+        return x == other.x && y == other.y;
+    }
 };
 
 /**

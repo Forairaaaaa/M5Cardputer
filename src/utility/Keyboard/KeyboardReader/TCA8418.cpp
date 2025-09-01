@@ -7,7 +7,6 @@
 #include "../../Adafruit_TCA8418/Adafruit_TCA8418_registers.h"
 #include <Arduino.h>
 #include <M5Unified.h>
-#include <algorithm>
 
 // Default interrupt pin for M5Cardputer ADV
 #define DEFAULT_TCA8418_INT_PIN 11
@@ -66,8 +65,10 @@ void TCA8418KeyboardReader::update()
     }
 
     remap(_key_event_raw_buffer);
-    printf("key event raw: (%d, %d): %d\n", _key_event_raw_buffer.row, _key_event_raw_buffer.col,
-           _key_event_raw_buffer.state);
+    // printf("key event raw: (%d, %d): %d\n", _key_event_raw_buffer.row, _key_event_raw_buffer.col,
+    //        _key_event_raw_buffer.state);
+
+    update_key_list(_key_event_raw_buffer);
 }
 
 TCA8418KeyboardReader::KeyEventRaw_t TCA8418KeyboardReader::get_key_event_raw(const uint8_t& eventRaw)
@@ -96,4 +97,24 @@ void TCA8418KeyboardReader::remap(KeyEventRaw_t& key)
 
     key.row = row;
     key.col = col;
+}
+
+void TCA8418KeyboardReader::update_key_list(const KeyEventRaw_t& eventRaw)
+{
+    Point2D_t point;
+    point.x = eventRaw.col;
+    point.y = eventRaw.row;
+
+    // Add or remove the key from the list
+    if (eventRaw.state) {
+        auto it = std::find(_key_list.begin(), _key_list.end(), point);
+        if (it == _key_list.end()) {
+            _key_list.push_back(point);
+        }
+    } else {
+        auto it = std::find(_key_list.begin(), _key_list.end(), point);
+        if (it != _key_list.end()) {
+            _key_list.erase(it);
+        }
+    }
 }
