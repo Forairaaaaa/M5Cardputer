@@ -90,90 +90,98 @@ void Keyboard_Class::updateKeysState()
     _key_pos_hid_keys.clear();
     _key_pos_modifier_keys.clear();
 
-    // Get special keys
     const auto& keys = keyList();
-    for (const auto& i : keys) {
-        // modifier
-        if (getKeyValue(i).value_first == KEY_FN) {
-            _keys_state_buffer.fn = true;
-            continue;
-        }
-        if (getKeyValue(i).value_first == KEY_OPT) {
-            _keys_state_buffer.opt = true;
-            continue;
-        }
 
-        if (getKeyValue(i).value_first == KEY_LEFT_CTRL) {
-            _keys_state_buffer.ctrl = true;
-            _key_pos_modifier_keys.push_back(i);
-            continue;
-        }
-
-        if (getKeyValue(i).value_first == KEY_LEFT_SHIFT) {
-            _keys_state_buffer.shift = true;
-            _key_pos_modifier_keys.push_back(i);
-            continue;
-        }
-
-        if (getKeyValue(i).value_first == KEY_LEFT_ALT) {
-            _keys_state_buffer.alt = true;
-            _key_pos_modifier_keys.push_back(i);
-            continue;
-        }
-
-        // function
-        if (getKeyValue(i).value_first == KEY_TAB) {
-            _keys_state_buffer.tab = true;
-            _key_pos_hid_keys.push_back(i);
-            continue;
-        }
-
-        if (getKeyValue(i).value_first == KEY_BACKSPACE) {
-            _keys_state_buffer.del = true;
-            _key_pos_hid_keys.push_back(i);
-            continue;
-        }
-
-        if (getKeyValue(i).value_first == KEY_ENTER) {
-            _keys_state_buffer.enter = true;
-            _key_pos_hid_keys.push_back(i);
-            continue;
-        }
-
-        if (getKeyValue(i).value_first == ' ') {
-            _keys_state_buffer.space = true;
-        }
-        _key_pos_hid_keys.push_back(i);
-        _key_pos_print_keys.push_back(i);
+    // 预分配容器大小以避免重复分配
+    const size_t key_count = keys.size();
+    if (key_count > 0) {
+        _key_pos_print_keys.reserve(key_count);
+        _key_pos_hid_keys.reserve(key_count);
+        _key_pos_modifier_keys.reserve(8);
+        _keys_state_buffer.modifier_keys.reserve(8);
+        _keys_state_buffer.hid_keys.reserve(key_count);
+        _keys_state_buffer.word.reserve(key_count);
     }
 
-    for (auto& i : _key_pos_modifier_keys) {
-        uint8_t key = getKeyValue(i).value_first;
-        _keys_state_buffer.modifier_keys.push_back(key);
-    }
+    for (const auto& key_pos : keys) {
+        const KeyValue_t key_value = getKeyValue(key_pos);
+        const uint8_t key_code     = key_value.value_first;
 
-    for (auto& k : _keys_state_buffer.modifier_keys) {
-        _keys_state_buffer.modifiers |= (1 << (k - 0x80));
-    }
+        switch (key_code) {
+            // 修饰键处理
+            case KEY_FN:
+                _keys_state_buffer.fn = true;
+                continue;
 
-    for (auto& i : _key_pos_hid_keys) {
-        uint8_t k = getKeyValue(i).value_first;
-        if (k == KEY_TAB || k == KEY_BACKSPACE || k == KEY_ENTER) {
-            _keys_state_buffer.hid_keys.push_back(k);
-            continue;
+            case KEY_OPT:
+                _keys_state_buffer.opt = true;
+                continue;
+
+            case KEY_LEFT_CTRL:
+                _keys_state_buffer.ctrl = true;
+                _key_pos_modifier_keys.push_back(key_pos);
+                _keys_state_buffer.modifier_keys.push_back(key_code);
+                _keys_state_buffer.modifiers |= (1 << (key_code - 0x80));
+                continue;
+
+            case KEY_LEFT_SHIFT:
+                _keys_state_buffer.shift = true;
+                _key_pos_modifier_keys.push_back(key_pos);
+                _keys_state_buffer.modifier_keys.push_back(key_code);
+                _keys_state_buffer.modifiers |= (1 << (key_code - 0x80));
+                continue;
+
+            case KEY_LEFT_ALT:
+                _keys_state_buffer.alt = true;
+                _key_pos_modifier_keys.push_back(key_pos);
+                _keys_state_buffer.modifier_keys.push_back(key_code);
+                _keys_state_buffer.modifiers |= (1 << (key_code - 0x80));
+                continue;
+
+            // 功能键处理
+            case KEY_TAB:
+                _keys_state_buffer.tab = true;
+                _key_pos_hid_keys.push_back(key_pos);
+                _keys_state_buffer.hid_keys.push_back(key_code);
+                continue;
+
+            case KEY_BACKSPACE:
+                _keys_state_buffer.del = true;
+                _key_pos_hid_keys.push_back(key_pos);
+                _keys_state_buffer.hid_keys.push_back(key_code);
+                continue;
+
+            case KEY_ENTER:
+                _keys_state_buffer.enter = true;
+                _key_pos_hid_keys.push_back(key_pos);
+                _keys_state_buffer.hid_keys.push_back(key_code);
+                continue;
+
+            case ' ':
+                _keys_state_buffer.space = true;
+                break;  // 空格键需要继续后续处理
+
+            default:
+                break;  // 普通按键继续后续处理
         }
-        uint8_t key = _kb_asciimap[k];
-        if (key) {
-            _keys_state_buffer.hid_keys.push_back(key);
-        }
-    }
 
-    // Deal what left
-    for (auto& i : _key_pos_print_keys) {
+        // 处理普通按键和空格键
+        _key_pos_hid_keys.push_back(key_pos);
+        _key_pos_print_keys.push_back(key_pos);
+
+        // 直接处理HID键值转换
+        if (key_code != ' ') {  // 空格已在上面处理
+            const uint8_t hid_key = _kb_asciimap[key_code];
+            if (hid_key) {
+                _keys_state_buffer.hid_keys.push_back(hid_key);
+            }
+        }
+
+        // 直接处理字符输出
         if (_keys_state_buffer.ctrl || _keys_state_buffer.shift || _is_caps_locked) {
-            _keys_state_buffer.word.push_back(getKeyValue(i).value_second);
+            _keys_state_buffer.word.push_back(key_value.value_second);
         } else {
-            _keys_state_buffer.word.push_back(getKeyValue(i).value_first);
+            _keys_state_buffer.word.push_back(key_value.value_first);
         }
     }
 }
