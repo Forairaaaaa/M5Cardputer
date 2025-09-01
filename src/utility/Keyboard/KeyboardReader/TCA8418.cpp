@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 #include "TCA8418.h"
+#include "../../common.h"
 #include "../../Adafruit_TCA8418/Adafruit_TCA8418_registers.h"
 #include <Arduino.h>
 #include <M5Unified.h>

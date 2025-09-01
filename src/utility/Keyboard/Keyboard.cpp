@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 #include "Keyboard.h"
+#include "../common.h"
 #include "KeyboardReader/KeyboardReader.h"
 #include "KeyboardReader/IOMatrix.h"
 #include "KeyboardReader/TCA8418.h"
