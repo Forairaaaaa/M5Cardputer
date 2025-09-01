@@ -7,12 +7,21 @@
 #include "KeyboardReader/KeyboardReader.h"
 #include "KeyboardReader/IOMatrix.h"
 #include <Arduino.h>
+#include <M5Unified.h>
 #include <memory>
 
 void Keyboard_Class::begin()
 {
-    // Default to IO Matrix keyboard reader for backward compatibility
-    _keyboard_reader = std::make_unique<IOMatrixKeyboardReader>();
+    // Reader injection
+    auto board_type = M5.getBoard();
+    if (board_type == m5::board_t::board_M5Cardputer) {
+        _keyboard_reader = std::make_unique<IOMatrixKeyboardReader>();
+    } else if (board_type == m5::board_t::board_M5CardputerADV) {
+        // TODO
+    } else {
+        printf("[error] Keyboard: Unsupported board type: %d\n", board_type);
+        return;
+    }
     _keyboard_reader->begin();
 }
 

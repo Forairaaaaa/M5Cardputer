@@ -6,7 +6,7 @@
 #ifndef M5CARDPUTER_H
 #define M5CARDPUTER_H
 
-#include "utility/Keyboard.h"
+#include "utility/Keyboard/Keyboard.h"
 #include <M5Unified.h>
 
 namespace m5 {
