@@ -24,6 +24,7 @@ public:
     Button_Class &BtnA     = M5.getButton(0);
 
     Keyboard_Class Keyboard = Keyboard_Class();
+
     /// for internal I2C device
     I2C_Class &In_I2C = m5::In_I2C;
 

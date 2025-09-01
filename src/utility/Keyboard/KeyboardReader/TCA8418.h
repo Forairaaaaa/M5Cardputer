@@ -22,11 +22,18 @@ public:
     void update() override;
 
 private:
-    std::unique_ptr<Adafruit_TCA8418> _tca8418;
-    volatile bool _interrupt_flag;
-    int _interrupt_pin;
+    struct KeyEventRaw_t {
+        bool state  = false;
+        uint8_t row = 0;
+        uint8_t col = 0;
+    };
 
-    static void IRAM_ATTR _gpio_isr_handler(void* arg);
-    void _remap_coordinates(uint8_t& row, uint8_t& col);
-    void _process_key_events();
+    std::unique_ptr<Adafruit_TCA8418> _tca8418;
+    volatile bool _isr_flag;
+    int _interrupt_pin;
+    KeyEventRaw_t _key_event_raw_buffer;
+
+    static void IRAM_ATTR gpio_isr_handler(void* arg);
+    KeyEventRaw_t get_key_event_raw(const uint8_t& eventRaw);
+    void remap(KeyEventRaw_t& key);
 };
