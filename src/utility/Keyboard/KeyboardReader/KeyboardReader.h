@@ -21,11 +21,26 @@ public:
     /**
      * @brief Initialize the keyboard reader
      */
-    virtual void begin() = 0;
+    virtual void begin()
+    {
+    }
 
     /**
-     * @brief Update the list of currently pressed keys
-     * @param keyList Reference to vector that will be filled with pressed key coordinates
+     * @brief Update the keyboard state and key list
      */
-    virtual void updateKeyList(std::vector<Point2D_t>& keyList) = 0;
+    virtual void update()
+    {
+    }
+
+    /**
+     * @brief Get the current key list
+     * @return Reference to the key list
+     */
+    inline const std::vector<Point2D_t>& keyList() const
+    {
+        return _key_list;
+    }
+
+protected:
+    std::vector<Point2D_t> _key_list;
 };

@@ -18,6 +18,13 @@ struct Chart_t {
  * @brief IO Matrix keyboard reader implementation
  */
 class IOMatrixKeyboardReader : public KeyboardReader {
+public:
+    IOMatrixKeyboardReader()          = default;
+    virtual ~IOMatrixKeyboardReader() = default;
+
+    void begin() override;
+    void update() override;
+
 private:
     const std::vector<int> output_list = {8, 9, 11};
     const std::vector<int> input_list  = {13, 15, 3, 4, 5, 6, 7};
@@ -26,11 +33,4 @@ private:
 
     void _set_output(const std::vector<int>& pinList, uint8_t output);
     uint8_t _get_input(const std::vector<int>& pinList);
-
-public:
-    IOMatrixKeyboardReader()          = default;
-    virtual ~IOMatrixKeyboardReader() = default;
-
-    void begin() override;
-    void updateKeyList(std::vector<Point2D_t>& keyList) override;
 };

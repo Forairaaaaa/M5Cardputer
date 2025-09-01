@@ -109,7 +109,6 @@ public:
     };
 
 private:
-    std::vector<Point2D_t> _key_list_buffer;
     std::vector<Point2D_t> _key_pos_print_keys;     // only text: eg A,B,C
     std::vector<Point2D_t> _key_pos_hid_keys;       // print key + space, enter, del
     std::vector<Point2D_t> _key_pos_modifier_keys;  // modifier key: eg shift, ctrl, alt
@@ -129,9 +128,13 @@ public:
     uint8_t getKey(Point2D_t keyCoor);
 
     void updateKeyList();
-    inline std::vector<Point2D_t>& keyList()
+    inline const std::vector<Point2D_t>& keyList()
     {
-        return _key_list_buffer;
+        if (_keyboard_reader) {
+            return _keyboard_reader->keyList();
+        }
+        static const std::vector<Point2D_t> empty_list;
+        return empty_list;
     }
 
     inline KeyValue_t getKeyValue(const Point2D_t& keyCoor)

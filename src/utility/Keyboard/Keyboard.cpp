@@ -6,21 +6,22 @@
 #include "Keyboard.h"
 #include "KeyboardReader/KeyboardReader.h"
 #include "KeyboardReader/IOMatrix.h"
+#include "KeyboardReader/TCA8418.h"
 #include <Arduino.h>
 #include <M5Unified.h>
 #include <memory>
 
 void Keyboard_Class::begin()
 {
-    // Reader injection
+    // Reader injection based on board type
     auto board_type = M5.getBoard();
     if (board_type == m5::board_t::board_M5Cardputer) {
         _keyboard_reader = std::make_unique<IOMatrixKeyboardReader>();
     } else if (board_type == m5::board_t::board_M5CardputerADV) {
-        // TODO
+        _keyboard_reader = std::make_unique<TCA8418KeyboardReader>();
     } else {
-        printf("[error] Keyboard: Unsupported board type: %d\n", board_type);
-        return;
+        printf("[error] Keyboard: Unsupported board type: %d\n", (int)board_type);
+        _keyboard_reader = std::make_unique<KeyboardReader>();
     }
     _keyboard_reader->begin();
 }
@@ -49,19 +50,20 @@ uint8_t Keyboard_Class::getKey(Point2D_t keyCoor)
 void Keyboard_Class::updateKeyList()
 {
     if (_keyboard_reader) {
-        _keyboard_reader->updateKeyList(_key_list_buffer);
+        _keyboard_reader->update();
     }
 }
 
 uint8_t Keyboard_Class::isPressed()
 {
-    return _key_list_buffer.size();
+    return keyList().size();
 }
 
 bool Keyboard_Class::isChange()
 {
-    if (_last_key_size != _key_list_buffer.size()) {
-        _last_key_size = _key_list_buffer.size();
+    uint8_t current_size = keyList().size();
+    if (_last_key_size != current_size) {
+        _last_key_size = current_size;
         return true;
     } else {
         return false;
@@ -70,8 +72,9 @@ bool Keyboard_Class::isChange()
 
 bool Keyboard_Class::isKeyPressed(char c)
 {
-    if (_key_list_buffer.size()) {
-        for (const auto& i : _key_list_buffer) {
+    const auto& keys = keyList();
+    if (keys.size()) {
+        for (const auto& i : keys) {
             if (getKey(i) == c) return true;
         }
     }
@@ -88,7 +91,8 @@ void Keyboard_Class::updateKeysState()
     _key_pos_modifier_keys.clear();
 
     // Get special keys
-    for (auto& i : _key_list_buffer) {
+    const auto& keys = keyList();
+    for (const auto& i : keys) {
         // modifier
         if (getKeyValue(i).value_first == KEY_FN) {
             _keys_state_buffer.fn = true;

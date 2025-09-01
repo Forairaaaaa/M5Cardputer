@@ -10,11 +10,8 @@
 #include <M5Unified.h>
 
 namespace m5 {
-class M5_CARDPUTER {
-private:
-    /* data */
-    bool _enableKeyboard;
 
+class M5_CARDPUTER {
 public:
     void begin(bool enableKeyboard = true);
     void begin(m5::M5Unified::config_t cfg, bool enableKeyboard = true);
@@ -34,6 +31,10 @@ public:
     I2C_Class &Ex_I2C = m5::Ex_I2C;
 
     void update(void);
+
+private:
+    /* data */
+    bool _enableKeyboard;
 };
 
 }  // namespace m5

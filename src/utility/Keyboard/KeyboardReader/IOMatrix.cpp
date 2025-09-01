@@ -45,9 +45,10 @@ void IOMatrixKeyboardReader::begin()
     _set_output(output_list, 0);
 }
 
-void IOMatrixKeyboardReader::updateKeyList(std::vector<Point2D_t>& keyList)
+void IOMatrixKeyboardReader::update()
 {
-    keyList.clear();
+    _key_list.clear();
+
     Point2D_t coor;
     uint8_t input_value = 0;
 
@@ -70,7 +71,7 @@ void IOMatrixKeyboardReader::updateKeyList(std::vector<Point2D_t>& keyList)
                     coor.y = -coor.y;
                     coor.y = coor.y + 3;
 
-                    keyList.push_back(coor);
+                    _key_list.push_back(coor);
                 }
             }
         }
