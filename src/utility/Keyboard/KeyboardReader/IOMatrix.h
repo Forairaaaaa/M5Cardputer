@@ -31,6 +31,6 @@ private:
 
     const Chart_t X_map_chart[7] = {{1, 0, 1}, {2, 2, 3}, {4, 4, 5}, {8, 6, 7}, {16, 8, 9}, {32, 10, 11}, {64, 12, 13}};
 
-    void _set_output(const std::vector<int>& pinList, uint8_t output);
-    uint8_t _get_input(const std::vector<int>& pinList);
+    void set_output(const std::vector<int>& pinList, uint8_t output);
+    uint8_t get_input(const std::vector<int>& pinList);
 };

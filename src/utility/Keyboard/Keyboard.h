@@ -108,17 +108,6 @@ public:
         }
     };
 
-private:
-    std::vector<Point2D_t> _key_pos_print_keys;     // only text: eg A,B,C
-    std::vector<Point2D_t> _key_pos_hid_keys;       // print key + space, enter, del
-    std::vector<Point2D_t> _key_pos_modifier_keys;  // modifier key: eg shift, ctrl, alt
-    KeysState _keys_state_buffer;
-    bool _is_caps_locked;
-    uint8_t _last_key_size;
-
-    std::unique_ptr<KeyboardReader> _keyboard_reader;
-
-public:
     Keyboard_Class() : _is_caps_locked(false)
     {
     }
@@ -160,4 +149,13 @@ public:
     {
         _is_caps_locked = isLocked;
     }
+
+private:
+    std::unique_ptr<KeyboardReader> _keyboard_reader;
+    std::vector<Point2D_t> _key_pos_print_keys;     // only text: eg A,B,C
+    std::vector<Point2D_t> _key_pos_hid_keys;       // print key + space, enter, del
+    std::vector<Point2D_t> _key_pos_modifier_keys;  // modifier key: eg shift, ctrl, alt
+    KeysState _keys_state_buffer;
+    bool _is_caps_locked;
+    uint8_t _last_key_size;
 };

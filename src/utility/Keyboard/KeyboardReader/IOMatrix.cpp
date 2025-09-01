@@ -6,7 +6,7 @@
 #include "IOMatrix.h"
 #include <Arduino.h>
 
-void IOMatrixKeyboardReader::_set_output(const std::vector<int>& pinList, uint8_t output)
+void IOMatrixKeyboardReader::set_output(const std::vector<int>& pinList, uint8_t output)
 {
     output = output & 0B00000111;
 
@@ -15,7 +15,7 @@ void IOMatrixKeyboardReader::_set_output(const std::vector<int>& pinList, uint8_
     digitalWrite(pinList[2], (output & 0B00000100));
 }
 
-uint8_t IOMatrixKeyboardReader::_get_input(const std::vector<int>& pinList)
+uint8_t IOMatrixKeyboardReader::get_input(const std::vector<int>& pinList)
 {
     uint8_t buffer    = 0x00;
     uint8_t pin_value = 0x00;
@@ -42,7 +42,7 @@ void IOMatrixKeyboardReader::begin()
         pinMode(i, INPUT_PULLUP);
     }
 
-    _set_output(output_list, 0);
+    set_output(output_list, 0);
 }
 
 void IOMatrixKeyboardReader::update()
@@ -53,8 +53,8 @@ void IOMatrixKeyboardReader::update()
     uint8_t input_value = 0;
 
     for (int i = 0; i < 8; i++) {
-        _set_output(output_list, i);
-        input_value = _get_input(input_list);
+        set_output(output_list, i);
+        input_value = get_input(input_list);
         /* If key pressed */
 
         if (input_value) {
