@@ -14,8 +14,10 @@
 
 void Keyboard_Class::begin()
 {
-    // Reader injection based on board type
     auto board_type = M5.getBoard();
+    _keyboard_reader.reset();
+
+    // Reader injection based on board type
     if (board_type == m5::board_t::board_M5Cardputer) {
         _keyboard_reader = std::make_unique<IOMatrixKeyboardReader>();
     } else if (board_type == m5::board_t::board_M5CardputerADV) {
@@ -24,6 +26,7 @@ void Keyboard_Class::begin()
         printf("[error] Keyboard: Unsupported board type: %d\n", (int)board_type);
         _keyboard_reader = std::make_unique<KeyboardReader>();
     }
+
     _keyboard_reader->begin();
 }
 
