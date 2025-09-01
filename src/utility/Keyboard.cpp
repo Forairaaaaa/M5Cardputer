@@ -1,18 +1,13 @@
-/**
- * @file keyboard.cpp
- * @author Forairaaaaa
- * @brief
- * @version 0.1
- * @date 2023-09-22
+/*
+ * SPDX-FileCopyrightText: 2025 M5Stack Technology CO LTD
  *
- * @copyright Copyright (c) 2023
- *
+ * SPDX-License-Identifier: MIT
  */
 #include "Keyboard.h"
-#include "IOMatrixKeyboardReader.h"
+#include "KeyboardReader/KeyboardReader.h"
+#include "KeyboardReader/IOMatrix.h"
+#include <Arduino.h>
 #include <memory>
-
-#include "Arduino.h"
 
 void Keyboard_Class::begin()
 {

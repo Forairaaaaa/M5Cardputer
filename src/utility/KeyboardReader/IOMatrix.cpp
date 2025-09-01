@@ -1,19 +1,10 @@
-/**
- * @file IOMatrixKeyboardReader.cpp
- * @author Forairaaaaa
- * @brief IO Matrix keyboard reader implementation
- * @version 0.1
- * @date 2023-09-22
+/*
+ * SPDX-FileCopyrightText: 2025 M5Stack Technology CO LTD
  *
- * @copyright Copyright (c) 2023
- *
+ * SPDX-License-Identifier: MIT
  */
-#include "IOMatrixKeyboardReader.h"
-#include <driver/gpio.h>
-#include "Arduino.h"
-
-#define digitalWrite(pin, level) gpio_set_level((gpio_num_t)pin, level)
-#define digitalRead(pin)         gpio_get_level((gpio_num_t)pin)
+#include "IOMatrix.h"
+#include <Arduino.h>
 
 void IOMatrixKeyboardReader::_set_output(const std::vector<int>& pinList, uint8_t output)
 {
@@ -42,15 +33,13 @@ void IOMatrixKeyboardReader::begin()
 {
     for (auto i : output_list) {
         gpio_reset_pin((gpio_num_t)i);
-        gpio_set_direction((gpio_num_t)i, GPIO_MODE_OUTPUT);
-        gpio_set_pull_mode((gpio_num_t)i, GPIO_PULLUP_PULLDOWN);
+        pinMode(i, OUTPUT);
         digitalWrite(i, 0);
     }
 
     for (auto i : input_list) {
         gpio_reset_pin((gpio_num_t)i);
-        gpio_set_direction((gpio_num_t)i, GPIO_MODE_INPUT);
-        gpio_set_pull_mode((gpio_num_t)i, GPIO_PULLUP_ONLY);
+        pinMode(i, INPUT_PULLUP);
     }
 
     _set_output(output_list, 0);

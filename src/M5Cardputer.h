@@ -1,10 +1,13 @@
+/*
+ * SPDX-FileCopyrightText: 2025 M5Stack Technology CO LTD
+ *
+ * SPDX-License-Identifier: MIT
+ */
 #ifndef M5CARDPUTER_H
 #define M5CARDPUTER_H
 
-#include "M5Unified.h"
 #include "utility/Keyboard.h"
-#include "utility/KeyboardReader.h"
-#include "utility/IOMatrixKeyboardReader.h"
+#include <M5Unified.h>
 
 namespace m5 {
 class M5_CARDPUTER {

@@ -1,20 +1,14 @@
-/**
- * @file keyboard.h
- * @author Forairaaaaa
- * @brief
- * @version 0.1
- * @date 2023-09-22
+/*
+ * SPDX-FileCopyrightText: 2025 M5Stack Technology CO LTD
  *
- * @copyright Copyright (c) 2023
- *
+ * SPDX-License-Identifier: MIT
  */
 #pragma once
-#include <iostream>
+#include "KeyboardReader/KeyboardReader.h"
+#include "Keyboard_def.h"
+#include <Arduino.h>
 #include <vector>
 #include <memory>
-#include "Arduino.h"
-#include "Keyboard_def.h"
-#include "KeyboardReader.h"
 
 struct KeyValue_t {
     const char value_first;
