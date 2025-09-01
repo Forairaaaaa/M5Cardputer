@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: MIT
  */
-#include "ReplView/ReplView.h"
+#include "ReplView.h"
 #include <M5Cardputer.h>
 
 LGFX_Sprite *canvas;
@@ -75,7 +75,7 @@ void setup()
     };
     repl_view.init(canvas);
 
-    // Get a random number
+    /* Get a random number */
     the_number = random(-999, 999);
 }
 
